@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 import cn.ucai.live.R;
+import cn.ucai.live.ui.activity.LoginActivity;
 
 /**
  * Created by clawpo on 2017/3/16.
@@ -28,5 +29,10 @@ public class MFGT {
     public static void startActivityForResult(Activity activity,Intent intent,int requestCode){
         activity.startActivityForResult(intent,requestCode);
         activity.overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
+    }
+
+    public static void gotoLogin(Activity activity) {
+        startActivity(activity, new Intent(activity,LoginActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 }
