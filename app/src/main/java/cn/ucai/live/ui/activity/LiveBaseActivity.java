@@ -14,7 +14,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cn.ucai.live.DemoConstants;
+import cn.ucai.live.LiveConstants;
 import cn.ucai.live.ThreadPoolManager;
 import cn.ucai.live.data.TestAvatarRepository;
 import cn.ucai.live.data.model.LiveRoom;
@@ -253,10 +253,10 @@ public abstract class LiveBaseActivity extends BaseActivity {
 
         @Override public void onCmdMessageReceived(List<EMMessage> messages) {
             EMMessage message = messages.get(messages.size() - 1);
-            if (DemoConstants.CMD_GIFT.equals(((EMCmdMessageBody) message.getBody()).action())) {
+            if (LiveConstants.CMD_GIFT.equals(((EMCmdMessageBody) message.getBody()).action())) {
                 //showLeftGiftView(message.getFrom());
-            } else if(DemoConstants.CMD_PRAISE.equals(((EMCmdMessageBody) message.getBody()).action())) {
-                showPraise(message.getIntAttribute(DemoConstants.EXTRA_PRAISE_COUNT, 1));
+            } else if(LiveConstants.CMD_PRAISE.equals(((EMCmdMessageBody) message.getBody()).action())) {
+                showPraise(message.getIntAttribute(LiveConstants.EXTRA_PRAISE_COUNT, 1));
             }
         }
 
