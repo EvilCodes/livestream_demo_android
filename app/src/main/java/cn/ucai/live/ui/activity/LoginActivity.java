@@ -20,7 +20,9 @@ import android.widget.TextView;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 
+import cn.ucai.live.LiveHelper;
 import cn.ucai.live.R;
+import cn.ucai.live.utils.MD5;
 import cn.ucai.live.utils.PreferenceManager;
 
 /**
@@ -39,7 +41,7 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (EMClient.getInstance().isLoggedInBefore()) {
+        if (LiveHelper.getInstance().isLoggedIn()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return;
@@ -125,9 +127,11 @@ public class LoginActivity extends BaseActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            EMClient.getInstance().login(email.toString(), password.toString(), new EMCallBack() {
+            EMClient.getInstance().login(email.toString(), MD5.getMessageDigest(password.toString()), new EMCallBack() {
                 @Override
                 public void onSuccess() {
+                    PreferenceManager.getInstance().setCurrentUserName(EMClient.getInstance().getCurrentUser());
+                    LiveHelper.getInstance().getUserProfileManager().asyncGetCurrentAppUserInfo();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 }
