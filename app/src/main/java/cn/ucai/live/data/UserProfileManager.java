@@ -3,18 +3,16 @@ package cn.ucai.live.data;
 import android.content.Context;
 import android.content.Intent;
 
-import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMClient;
-import com.hyphenate.easeui.domain.EaseUser;
 import com.hyphenate.easeui.domain.User;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import cn.ucai.live.I;
 import cn.ucai.live.data.model.IUserModel;
+import cn.ucai.live.data.model.OnCompleteListener;
 import cn.ucai.live.data.model.UserModel;
+import cn.ucai.live.utils.L;
 import cn.ucai.live.utils.PreferenceManager;
 import cn.ucai.live.utils.Result;
 import cn.ucai.live.utils.ResultUtils;
@@ -34,14 +32,6 @@ public class UserProfileManager {
 	 */
 	private boolean sdkInited = false;
 
-	/**
-	 * HuanXin sync contact nick and avatar listener
-	 */
-	private List<DataSyncListener> syncContactInfosListeners;
-
-	private boolean isSyncingContactInfosWithServer = false;
-
-	private EaseUser currentUser;
 	private User currentAppUser;
 	IUserModel userModel;
 
@@ -53,90 +43,17 @@ public class UserProfileManager {
 			return true;
 		}
 		appContext = context;
-		ParseManager.getInstance().onInit(context);
-		syncContactInfosListeners = new ArrayList<DataSyncListener>();
 		sdkInited = true;
 		userModel = new UserModel();
 		return true;
 	}
 
-	public void addSyncContactInfoListener(DataSyncListener listener) {
-		if (listener == null) {
-			return;
-		}
-		if (!syncContactInfosListeners.contains(listener)) {
-			syncContactInfosListeners.add(listener);
-		}
-	}
-
-	public void removeSyncContactInfoListener(DataSyncListener listener) {
-		if (listener == null) {
-			return;
-		}
-		if (syncContactInfosListeners.contains(listener)) {
-			syncContactInfosListeners.remove(listener);
-		}
-	}
-
-	public void asyncFetchContactInfosFromServer(List<String> usernames, final EMValueCallBack<List<EaseUser>> callback) {
-		if (isSyncingContactInfosWithServer) {
-			return;
-		}
-		isSyncingContactInfosWithServer = true;
-		ParseManager.getInstance().getContactInfos(usernames, new EMValueCallBack<List<EaseUser>>() {
-
-			@Override
-			public void onSuccess(List<EaseUser> value) {
-				isSyncingContactInfosWithServer = false;
-				// in case that logout already before server returns,we should
-				// return immediately
-				if (!SuperWeChatHelper.getInstance().isLoggedIn()) {
-					return;
-				}
-				if (callback != null) {
-					callback.onSuccess(value);
-				}
-			}
-
-			@Override
-			public void onError(int error, String errorMsg) {
-				isSyncingContactInfosWithServer = false;
-				if (callback != null) {
-					callback.onError(error, errorMsg);
-				}
-			}
-
-		});
-
-	}
-
-	public void notifyContactInfosSyncListener(boolean success) {
-		for (DataSyncListener listener : syncContactInfosListeners) {
-			listener.onSyncComplete(success);
-		}
-	}
-
-	public boolean isSyncingContactInfoWithServer() {
-		return isSyncingContactInfosWithServer;
-	}
-
+	//重置方法,清空内存和sf里面的数据
 	public synchronized void reset() {
-		isSyncingContactInfosWithServer = false;
-		currentUser = null;
 		currentAppUser = null;
 		PreferenceManager.getInstance().removeCurrentUserInfo();
 	}
 
-	public synchronized EaseUser getCurrentUserInfo() {
-		if (currentUser == null) {
-			String username = EMClient.getInstance().getCurrentUser();
-			currentUser = new EaseUser(username);
-			String nick = getCurrentUserNick();
-			currentUser.setNick((nick != null) ? nick : username);
-			currentUser.setAvatar(getCurrentUserAvatar());
-		}
-		return currentUser;
-	}
 
 	public synchronized User getCurrentAppUserInfo(){
 		L.e(TAG,"getCurrentAppUserInfo,currentAppUser="+currentAppUser);
@@ -163,7 +80,6 @@ public class UserProfileManager {
 								if (user!=null){
 									updatenick = true;
 									setCurrentAppUserNick(user.getMUserNick());
-									SuperWeChatHelper.getInstance().saveAppContact(user);
 								}
 							}
 						}
@@ -193,7 +109,6 @@ public class UserProfileManager {
 								if (user!=null){
 									success = true;
 									setCurrentAppUserAvatar(user.getAvatar());
-									SuperWeChatHelper.getInstance().saveAppContact(user);
 								}
 							}
 						}
@@ -218,7 +133,6 @@ public class UserProfileManager {
 		currentAppUser = user;
 		setCurrentAppUserNick(user.getMUserNick());
 		setCurrentAppUserAvatar(user.getAvatar());
-		SuperWeChatHelper.getInstance().saveAppContact(user);
 	}
 
 	public void asyncGetCurrentAppUserInfo() {
@@ -233,10 +147,6 @@ public class UserProfileManager {
 //								L.e(TAG,"asyncGetCurrentAppUserInfo,user="+user);
 								if (user!=null){
 									updateCurrentAppUserInfo(user);
-//									currentAppUser = user;
-//									setCurrentAppUserNick(user.getMUserNick());
-//									setCurrentAppUserAvatar(user.getAvatar());
-//									SuperWeChatHelper.getInstance().saveAppContact(user);
 								}
 							}
 						}
@@ -249,36 +159,6 @@ public class UserProfileManager {
 				});
 	}
 
-	public void asyncGetCurrentUserInfo() {
-		ParseManager.getInstance().asyncGetCurrentUserInfo(new EMValueCallBack<EaseUser>() {
-
-			@Override
-			public void onSuccess(EaseUser value) {
-			    if(value != null){
-    				setCurrentUserNick(value.getNick());
-    				setCurrentUserAvatar(value.getAvatar());
-			    }
-			}
-
-			@Override
-			public void onError(int error, String errorMsg) {
-
-			}
-		});
-
-	}
-	public void asyncGetUserInfo(final String username,final EMValueCallBack<EaseUser> callback){
-		ParseManager.getInstance().asyncGetUserInfo(username, callback);
-	}
-	private void setCurrentUserNick(String nickname) {
-		getCurrentUserInfo().setNick(nickname);
-		PreferenceManager.getInstance().setCurrentUserNick(nickname);
-	}
-
-	private void setCurrentUserAvatar(String avatar) {
-		getCurrentUserInfo().setAvatar(avatar);
-		PreferenceManager.getInstance().setCurrentUserAvatar(avatar);
-	}
 
 	private void setCurrentAppUserNick(String nickname){
 		getCurrentAppUserInfo().setMUserNick(nickname);
