@@ -14,19 +14,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.hyphenate.exceptions.HyphenateException;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.ucai.live.R;
 import cn.ucai.live.ThreadPoolManager;
 import cn.ucai.live.data.model.LiveRoom;
 import cn.ucai.live.data.restapi.ApiManager;
 import cn.ucai.live.data.restapi.model.ResponseModule;
 import cn.ucai.live.ui.GridMarginDecoration;
-
-import com.bumptech.glide.Glide;
-import cn.ucai.live.R;
-import com.hyphenate.exceptions.HyphenateException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -80,6 +82,26 @@ public class LiveListFragment extends Fragment {
 
     }
 
+    private void loadGiftList(){
+//        ThreadPoolManager.getInstance().executeTask(new ThreadPoolManager.Task<List<Gift>>(){
+//
+//            @Override
+//            public List<Gift> onRequest() throws HyphenateException {
+//                return ApiManager.get().getAllGifts();
+//            }
+//
+//            @Override
+//            public void onSuccess(List<Gift> gifts) {
+//
+//            }
+//
+//            @Override
+//            public void onError(HyphenateException exception) {
+//
+//            }
+//        });
+        ApiManager.get().getAllGifts();
+    }
 
     private void showLiveList(final boolean isLoadMore){
         if(!isLoadMore)
@@ -87,6 +109,7 @@ public class LiveListFragment extends Fragment {
         else
             loadmorePB.setVisibility(View.VISIBLE);
         isLoading = true;
+        loadGiftList();
         ThreadPoolManager.getInstance().executeTask(new ThreadPoolManager.Task<ResponseModule<List<LiveRoom>>>() {
             @Override public ResponseModule<List<LiveRoom>> onRequest() throws HyphenateException {
                 if(!isLoadMore){
