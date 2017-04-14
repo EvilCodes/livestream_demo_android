@@ -7,11 +7,13 @@ import com.hyphenate.chat.EMClient;
 import com.hyphenate.easeui.domain.User;
 
 import java.io.File;
+import java.io.IOException;
 
 import cn.ucai.live.I;
 import cn.ucai.live.data.model.IUserModel;
 import cn.ucai.live.data.model.OnCompleteListener;
 import cn.ucai.live.data.model.UserModel;
+import cn.ucai.live.data.restapi.ApiManager;
 import cn.ucai.live.utils.L;
 import cn.ucai.live.utils.PreferenceManager;
 import cn.ucai.live.utils.Result;
@@ -136,27 +138,41 @@ public class UserProfileManager {
 	}
 
 	public void asyncGetCurrentAppUserInfo() {
-		userModel.loadUserInfo(appContext, EMClient.getInstance().getCurrentUser(),
-				new OnCompleteListener<String>() {
-					@Override
-					public void onSuccess(String s) {
-						if (s!=null){
-							Result result = ResultUtils.getResultFromJson(s, User.class);
-							if (result!=null && result.isRetMsg()){
-								User user = (User) result.getRetData();
-//								L.e(TAG,"asyncGetCurrentAppUserInfo,user="+user);
-								if (user!=null){
-									updateCurrentAppUserInfo(user);
-								}
-							}
-						}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					User user = ApiManager.get().loadUserInfo(EMClient.getInstance().getCurrentUser());
+					if (user!=null){
+						updateCurrentAppUserInfo(user);
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
 
-					@Override
-					public void onError(String error) {
-
-					}
-				});
+//		userModel.loadUserInfo(appContext, EMClient.getInstance().getCurrentUser(),
+//				new OnCompleteListener<String>() {
+//					@Override
+//					public void onSuccess(String s) {
+//						if (s!=null){
+//							Result result = ResultUtils.getResultFromJson(s, User.class);
+//							if (result!=null && result.isRetMsg()){
+//								User user = (User) result.getRetData();
+////								L.e(TAG,"asyncGetCurrentAppUserInfo,user="+user);
+//								if (user!=null){
+//									updateCurrentAppUserInfo(user);
+//								}
+//							}
+//						}
+//					}
+//
+//					@Override
+//					public void onError(String error) {
+//
+//					}
+//				});
 	}
 
 
