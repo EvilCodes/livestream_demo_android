@@ -14,6 +14,7 @@ import java.util.List;
 
 import cn.ucai.live.I;
 import cn.ucai.live.LiveApplication;
+import cn.ucai.live.LiveConstants;
 import cn.ucai.live.data.model.Gift;
 import cn.ucai.live.data.model.LiveRoom;
 import cn.ucai.live.data.restapi.model.LiveStatusModule;
@@ -150,7 +151,7 @@ public class ApiManager {
 
     public String createLiveRoom(String name,String description) throws IOException {
         return createLiveRoom("1IFgE",name,description,EMClient.getInstance().getCurrentUser(),300,
-                EMClient.getInstance().getCurrentUser()+",fffire,seven009,zhu123456,cccccg,qwer000,gsd123,xsh123");
+                EMClient.getInstance().getCurrentUser());
     }
 
     public void deleteLiveRoom(String chatRoomId){
@@ -212,7 +213,6 @@ public class ApiManager {
         liveRoom.setDescription(description);
         liveRoom.setAnchorId(EMClient.getInstance().getCurrentUser());
         liveRoom.setCover(coverUrl);
-
         String id = createLiveRoom(name, description);
         L.e(TAG,"id="+id);
         if (id!=null){
