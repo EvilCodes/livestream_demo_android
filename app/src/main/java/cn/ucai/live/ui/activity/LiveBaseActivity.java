@@ -68,6 +68,7 @@ public abstract class LiveBaseActivity extends BaseActivity {
 
     @BindView(R.id.user_manager_image) ImageView userManagerView;
     @BindView(R.id.switch_camera_image) ImageView switchCameraView;
+    @BindView(R.id.gift_image) ImageView giftImageView;
     @BindView(R.id.like_image) ImageView likeImageView;
     @BindView(R.id.txt_live_id) TextView liveIdView;
     @BindView(R.id.tv_username) TextView usernameView;
@@ -516,6 +517,11 @@ public abstract class LiveBaseActivity extends BaseActivity {
     }
 
     @OnClick(R.id.user_manager_image) void showUserList() {
+        RoomUserManagementDialog managementDialog = new RoomUserManagementDialog(chatroomId);
+        managementDialog.show(getSupportFragmentManager(), "RoomUserManagementDialog");
+    }
+
+    @OnClick(R.id.gift_image) void showGiftList(){
         RoomUserManagementDialog managementDialog = new RoomUserManagementDialog(chatroomId);
         managementDialog.show(getSupportFragmentManager(), "RoomUserManagementDialog");
     }
